@@ -15,9 +15,9 @@ dotenv_1.default.config();
 //  Create an Express app instance
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: 'http://localhost:8081',
-    methods: 'GET, HEAD, PUT, PATCH, POST, DELETE',
-    allowedHeaders: ['Content-Type', 'application/json', 'Authorization'],
+    origin: "exp://192.168.1.19:8081",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
 }));
 //  Connect to MongoDB
 (0, database_1.default)();
@@ -32,7 +32,7 @@ app.get('/health', (req, res) => {
 // // Use the product routes
 // app.use('/api/Product', productRoute);
 // Use the student routes
-app.use('/api/Students', studentRoute_1.default);
+app.use('/api/students', studentRoute_1.default);
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
