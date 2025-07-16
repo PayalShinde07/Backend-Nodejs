@@ -1,77 +1,68 @@
-//  Import express and dotenv
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
+import cors from 'cors';
 import connectDB from './config/database';
 import authRoutes from './routes/authRoutes';
-import studentRoute from './routes/studentRoute';
-import cors from 'cors';
+import studentRoutes from './routes/studentRoute'; // Renamed for clarity
 
-//  Load .env file variables
+// Load .env variables
 dotenv.config();
 
-//  Create an Express app instance
+// Initialize Express app
 const app = express();
 
+// Middleware: Enable CORS
 app.use(
   cors({
-    origin: ["exp://192.168.1.19:8081", "http://localhost:3000", "http://localhost:3001"], // Add your frontend URLs
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: ['http://localhost:8081'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
   })
 );
 
-//  Connect to MongoDB
-connectDB();
-
-//  Define the port (from .env or fallback to 5000)
-const PORT: number = parseInt(process.env.PORT || '5000');
-
-//  Middleware to parse JSON
+// Middleware: Parse JSON and URL-encoded data
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-//  Define a simple health check route
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+// Connect to MongoDB
+connectDB();
+
+// Define port with fallback
+const PORT: number = parseInt(process.env.PORT || '5000', 10);
+
+// Health check route
+app.get('/health', (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'OK',
     message: 'Server is running',
     timestamp: new Date().toISOString()
   });
 });
 
-// Authentication routes
+// API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/students', studentRoutes);
 
-// Student routes (now protected)
-app.use('/api/students', studentRoute);
-
-// 404 handler
-app.use('*', (req, res) => {
+// 404 - Not Found Handler
+app.use('*', (req: Request, res: Response) => {
   res.status(404).json({
     success: false,
     message: 'Route not found'
   });
 });
 
-// Global error handler
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Global error handler:', error);
-  
-  res.status(error.statusCode || 500).json({
+// Global Error Handler
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error('Global error handler:', err);
+  res.status(err.statusCode || 500).json({
     success: false,
-    message: error.message || 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    message: err.message || 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
 });
 
-// Start the server
+// Start Server
 app.listen(PORT, () => {
-  console.log(`   Server is running at http://localhost:${PORT}`);
-  console.log(`   API Documentation:`);
-  console.log(`   - Health Check: GET http://localhost:${PORT}/health`);
-  console.log(`   - Auth Routes: POST http://localhost:${PORT}/api/auth/signup`);
-  console.log(`   - Auth Routes: POST http://localhost:${PORT}/api/auth/signin`);
-  console.log(`   - Student Routes: GET http://localhost:${PORT}/api/students/getAllStudents`);
+  console.log(`🚀 Server is running at http://localhost:${PORT}`);
 });

@@ -1,36 +1,32 @@
 import express, { Router } from "express";
+import {createStudent,getAllStudents,getStudentById,searchStudents,getStudentByStudentId,updateStudent,deleteStudent,softDeleteStudent,restoreStudent} from "../controllers/studentControllers";
 import {
-  createStudent,
-  getAllStudents,
-  getStudentById,
-  searchStudents,
-  getStudentByStudentId,
-  updateStudent,
-  deleteStudent,
-  softDeleteStudent,
-  restoreStudent
-} from "../controllers/studentControllers";
-import { authenticateToken, requireAdmin } from "../middleware/authMiddleware";
+  authenticateToken,
+  requireAdmin
+} from "../middleware/authMiddleware";
 
 const router: Router = express.Router();
 
-// Public routes (if you want some to be accessible without authentication)
-// router.get("/getAllStudents", getAllStudents);
+// Apply authentication middleware to all routes
+router.use(authenticateToken);
 
-// Protected routes (require authentication)
-router.use(authenticateToken); // Apply authentication to all routes below
+// GET routes
+router.get("/students", getAllStudents);                             // ?page=&limit=&course=
+router.get("/students/search", searchStudents);                      // ?query=&page=&limit=
+router.get("/students/id/:id", getStudentById);                      // Get by MongoDB _id
+router.get("/students/studentId/:studentId", getStudentByStudentId); // Get by custom studentId
 
-// Routes accessible by authenticated users
-router.get("/getAllStudents", getAllStudents);
-router.get("/search", searchStudents);
-router.get("/studentId/:studentId", getStudentByStudentId);
-router.get("/:id", getStudentById);
+// POST route
+router.post("/students", requireAdmin, createStudent);
 
-// Routes that require admin privileges
-router.post("/createStudent", requireAdmin, createStudent);
-router.put("/:id", requireAdmin, updateStudent);
-router.delete("/:id", requireAdmin, deleteStudent);
-router.patch("/:id/deactivate", requireAdmin, softDeleteStudent);
-router.patch("/:id/restore", requireAdmin, restoreStudent);
+// PUT route
+router.put("/students/:id", requireAdmin, updateStudent);
+
+// DELETE route
+router.delete("/students/:id", requireAdmin, deleteStudent);
+
+// PATCH routes
+router.patch("/students/:id/deactivate", requireAdmin, softDeleteStudent);
+router.patch("/students/:id/restore", requireAdmin, restoreStudent);
 
 export default router;

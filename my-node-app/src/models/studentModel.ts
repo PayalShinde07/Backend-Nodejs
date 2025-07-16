@@ -1,6 +1,6 @@
-import mongoose, { Double } from "mongoose";
+import mongoose from "mongoose";
 
-interface Student  {
+interface Student {
   studentId: string;
   firstName: string;
   lastName: string;
@@ -9,68 +9,79 @@ interface Student  {
   grade: string;
   course: string;
   phoneNumber: string;
-  enrollmentNumber: Number;
+  enrollmentNumber: number;
   address: object;
   subjects: Array<string>;
-  cgpa: Double;
+  cgpa: number;
   isActive: boolean;
 }
 
-
-//Define schema for student
 const studentSchema = new mongoose.Schema({
   studentId: {
     type: String,
-    required: true,
+    required: [true, 'Student ID is required'],
     unique: true,
+    trim: true
   },
   firstName: {
     type: String,
-    required: true,
+    required: [true, 'First name is required'],
+    trim: true
   },
   lastName: {
     type: String,
-    required: true,
+    required: [true, 'Last name is required'],
+    trim: true
   },
   email: {
     type: String,
-    required: true,
+    required: [true, 'Email is required'],
     unique: true,
+    trim: true,
+    lowercase: true,
+    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
   },
   age: {
     type: String,
-    required: true,
+    required: [true, 'Age is required']
   },
   grade: {
     type: String,
-    required: true,
+    required: [true, 'Grade is required']
   },
   course: {
     type: String,
-    required: true,
+    required: [true, 'Course is required']
   },
   phoneNumber: {
     type: String,
-    required: true,
+    required: [true, 'Phone number is required']
   },
   enrollmentNumber: {
     type: Number,
-    required: true,
+    required: [true, 'Enrollment number is required']
   },
   address: {
     type: Object,
-    required: true,
+    required: [true, 'Address is required']
   },
   subjects: {
-    type: Array,
-    required: true,
+    type: [String],
+    required: [true, 'Subjects are required']
   },
   cgpa: {
     type: Number,
-    required: true
+    required: [true, 'CGPA is required'],
+    min: [0, 'CGPA cannot be negative'],
+    max: [10, 'CGPA cannot exceed 10']
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
+}, {
+  timestamps: true
 });
 
-//Create model for stuudent
 const Student_Info = mongoose.model<Student>("Student", studentSchema);
 export default Student_Info;
