@@ -10,27 +10,34 @@ import {
   restoreStudent,
   searchStudents
 } from "../controllers/studentControllers";
+import {
+  validateStudent,
+  validateStudentUpdate,
+  validateSearch,
+  validateGetAllStudents,
+  validateObjectId,
+  validateStudentIdParam
+} from "../middleware/studentMiddleware";
 
 const router: Router = express.Router();
 
 // GET routes - Order matters! More specific routes should come first
-router.get("/search", searchStudents);                      // Search students: ?query=searchTerm&page=1&limit=10
-router.get("/student-id/:studentId", getStudentByStudentId); // Get by custom studentId
-router.get("/active", getAllStudents);                       // Get all active students (with filters)
-router.get("/", getAllStudents);                            // Get all students: ?page=1&limit=10&course=CS&grade=A
-router.get("/:id", getStudentById);                         // Get by MongoDB _id
+router.get("/search", validateSearch, searchStudents);
+router.get("/student-id/:studentId", validateStudentIdParam, getStudentByStudentId);
+router.get("/", validateGetAllStudents, getAllStudents);
+router.get("/:id", validateObjectId, getStudentById);
 
 // POST routes
-router.post("/", createStudent);
+router.post("/", validateStudent, createStudent);
 
 // PUT routes
-router.put("/:id", updateStudent);
+router.put("/:id", validateObjectId, validateStudentUpdate, updateStudent);
 
 // DELETE routes
-router.delete("/:id", deleteStudent);
+router.delete("/:id", validateObjectId, deleteStudent);
 
 // PATCH routes for soft delete/restore
-router.patch("/:id/deactivate", softDeleteStudent);
-router.patch("/:id/restore", restoreStudent);
+router.patch("/:id/deactivate", validateObjectId, softDeleteStudent);
+router.patch("/:id/restore", validateObjectId, restoreStudent);
 
 export default router;
